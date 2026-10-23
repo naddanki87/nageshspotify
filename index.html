@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NageshSpotify</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="7" /><path d="M7.5 17V7l9 10V7" /></svg>
+        </span>
+        <span>NageshSpotify</span>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="home">
+          <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z" /></svg>Home
+        </button>
+        <button class="nav-item" data-view="search">
+          <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></svg>Search
+        </button>
+        <button class="nav-item" data-view="library">
+          <svg viewBox="0 0 24 24"><path d="M4 3v18M9 3v18M14 4l6 16" /></svg>Your Library
+        </button>
+      </nav>
+      <div class="sidebar-section">
+        <div class="sidebar-head">
+          <span>Playlists</span>
+          <button id="new-playlist" class="icon-btn" title="Create playlist" aria-label="Create playlist">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+          </button>
+        </div>
+        <ul id="sidebar-playlists" class="sidebar-playlists"></ul>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <header class="topbar">
+        <div class="history">
+          <button class="round-btn" id="back" aria-label="Back"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7" /></svg></button>
+          <button class="round-btn" id="forward" aria-label="Forward"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7" /></svg></button>
+        </div>
+        <div class="search-box hidden" id="search-box">
+          <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></svg>
+          <input id="search-input" type="search" placeholder="What do you want to listen to?" autocomplete="off" />
+        </div>
+        <div class="avatar" title="Nagesh">N</div>
+      </header>
+      <section id="view" class="view"></section>
+    </main>
+
+    <footer class="player">
+      <div class="now-playing">
+        <div class="np-cover" id="np-cover"></div>
+        <div class="np-meta">
+          <div class="np-title" id="np-title">Pick a song</div>
+          <div class="np-artist" id="np-artist">—</div>
+        </div>
+        <button class="icon-btn like-btn" id="np-like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg></button>
+      </div>
+      <div class="controls">
+        <div class="buttons">
+          <button class="icon-btn" id="shuffle" aria-label="Shuffle"><svg viewBox="0 0 24 24"><path d="M3 7h3c4 0 6 10 10 10h4M3 17h3c1.6 0 2.8-1.6 3.9-3.6M14 8.6C14.9 7.6 15.8 7 17 7h3M18 4l3 3-3 3M18 14l3 3-3 3" /></svg></button>
+          <button class="icon-btn" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5v14M19 5 9 12l10 7z" /></svg></button>
+          <button class="play-btn" id="play" aria-label="Play">
+            <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+            <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+          </button>
+          <button class="icon-btn" id="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z" /></svg></button>
+          <button class="icon-btn" id="repeat" aria-label="Repeat"><svg viewBox="0 0 24 24"><path d="M17 3l3 3-3 3M4 11V9a3 3 0 0 1 3-3h13M7 21l-3-3 3-3M20 13v2a3 3 0 0 1-3 3H4" /></svg><span class="repeat-one">1</span></button>
+        </div>
+        <div class="progress">
+          <span id="cur-time">0:00</span>
+          <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Seek" />
+          <span id="dur-time">0:00</span>
+        </div>
+      </div>
+      <div class="extras">
+        <button class="icon-btn" id="queue-btn" aria-label="Queue"><svg viewBox="0 0 24 24"><path d="M3 6h13M3 12h13M3 18h8M18 14v6l4-3z" /></svg></button>
+        <button class="icon-btn" id="mute" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" /></svg></button>
+        <input type="range" id="volume" min="0" max="100" value="70" aria-label="Volume" />
+      </div>
+    </footer>
+  </div>
+
+  <aside class="queue-panel hidden" id="queue-panel">
+    <div class="queue-head"><h3>Queue</h3><button class="icon-btn" id="queue-close" aria-label="Close queue"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg></button></div>
+    <div id="queue-list"></div>
+  </aside>
+
+  <div class="toast hidden" id="toast"></div>
+  <audio id="audio" preload="metadata"></audio>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
