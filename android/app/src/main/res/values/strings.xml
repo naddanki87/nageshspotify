@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NageshSpotify</string>
+    <string name="search_hint">Search songs, artists, albums</string>
+    <string name="tab_songs">Songs</string>
+    <string name="tab_albums">Albums</string>
+    <string name="tab_artists">Artists</string>
+    <string name="tab_folders">Folders</string>
+    <string name="tab_liked">Liked</string>
+    <string name="open_file">Open audio file</string>
+    <string name="refresh">Rescan music</string>
+    <string name="back">Back</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
+    <string name="like">Like</string>
+    <string name="close">Close</string>
+    <string name="now_playing">Now playing</string>
+    <string name="nothing_playing">Pick a song</string>
+    <string name="permission_needed">NageshSpotify needs access to the audio files on this device to play them.</string>
+    <string name="allow_access">Allow access</string>
+    <string name="no_music">No audio files found on this device.\nCopy some music to your phone, or tap the folder icon to open a file.</string>
+    <string name="no_results">Nothing matches your search.</string>
+    <string name="no_liked">Songs you like will appear here. Tap the heart on any song.</string>
+    <string name="channel_name">Playback</string>
+</resources>

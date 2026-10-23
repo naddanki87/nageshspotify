@@ -1,0 +1,50 @@
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.nagesh.spotify"
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.nagesh.spotify"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        // Same key as tools/BuildApk.java, so either build can update an installed copy
+        sideload {
+            storeFile rootProject.file("signing/nageshspotify.keystore")
+            storePassword "nageshspotify"
+            keyAlias "nageshspotify"
+            keyPassword "nageshspotify"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.sideload
+        }
+        debug {
+            signingConfig signingConfigs.sideload
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
+}
+
+dependencies {
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.robolectric:robolectric:4.17"
+}

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/panel"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="4dp">
+
+        <TextView
+            android:id="@+id/greeting"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/refresh"
+            style="@style/IconButton"
+            android:contentDescription="@string/refresh"
+            android:src="@drawable/ic_refresh" />
+
+        <ImageButton
+            android:id="@+id/open_file"
+            style="@style/IconButton"
+            android:contentDescription="@string/open_file"
+            android:src="@drawable/ic_folder" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_search"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_search"
+            android:tint="@color/muted" />
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"
+            android:singleLine="true"
+            android:textColor="@color/text"
+            android:textColorHint="@color/muted"
+            android:textSize="15sp" />
+
+        <ImageButton
+            android:id="@+id/search_clear"
+            style="@style/IconButton"
+            android:contentDescription="@string/close"
+            android:src="@drawable/ic_close"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/tabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView android:id="@+id/tab_songs" style="@style/Chip" android:text="@string/tab_songs" />
+            <TextView android:id="@+id/tab_albums" style="@style/Chip" android:text="@string/tab_albums" />
+            <TextView android:id="@+id/tab_artists" style="@style/Chip" android:text="@string/tab_artists" />
+            <TextView android:id="@+id/tab_folders" style="@style/Chip" android:text="@string/tab_folders" />
+            <TextView android:id="@+id/tab_liked" style="@style/Chip" android:text="@string/tab_liked" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/group_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/group_back"
+            style="@style/IconButton"
+            android:contentDescription="@string/back"
+            android:src="@drawable/ic_back" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/group_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="@color/text"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/group_sub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textColor="@color/muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/group_shuffle"
+            style="@style/IconButton"
+            android:contentDescription="@string/shuffle"
+            android:src="@drawable/ic_shuffle" />
+
+        <ImageButton
+            android:id="@+id/group_play"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_play_green"
+            android:contentDescription="@string/play"
+            android:padding="13dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play"
+            android:tint="@color/bg" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:divider="@null"
+            android:fastScrollEnabled="true"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:id="@+id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/empty_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:padding="32dp"
+                android:textColor="@color/muted"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/empty_button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_button"
+                android:paddingStart="28dp"
+                android:paddingEnd="28dp"
+                android:text="@string/allow_access"
+                android:textAllCaps="false"
+                android:textColor="@color/bg"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/mini_player"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_mini_player"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp">
+
+            <ImageView
+                android:id="@+id/mini_cover"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/mini_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:textColor="@color/text"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/mini_artist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:textColor="@color/muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/mini_like"
+                style="@style/IconButton"
+                android:contentDescription="@string/like"
+                android:src="@drawable/ic_heart_outline" />
+
+            <ImageButton
+                android:id="@+id/mini_play"
+                style="@style/IconButton"
+                android:contentDescription="@string/play"
+                android:src="@drawable/ic_play" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/mini_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:max="1000"
+            android:progressBackgroundTint="#FF535353"
+            android:progressTint="@color/text" />
+    </LinearLayout>
+</LinearLayout>
