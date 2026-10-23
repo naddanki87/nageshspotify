@@ -5,8 +5,29 @@
   const audio = $("#audio");
   const view = $("#view");
 
+  // ---------- Server API ----------
+  // The catalog, likes, playlists and recently played songs live in the Spring Boot backend.
+  async function api(method, path, body) {
+    const res = await fetch(`/api${path}`, {
+      method,
+      headers: body === undefined ? {} : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw Object.assign(new Error(err.detail || res.statusText), { status: res.status });
+    }
+    return res.status === 204 ? null : res.json();
+  }
+  const failed = (err) => toast(err.message || "Something went wrong — is the server running?");
+
+  let ALBUMS = [];
+  let TRACKS = [];
+  let GENRES = [];
+
   // ---------- Persistence ----------
-  const STORE_KEY = "nageshspotify:v1";
+  // Only the volume is a per-browser setting; everything else is saved on the server.
+  const STORE_KEY = "nageshspotify:v2";
   function load() {
     try {
       return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
@@ -16,9 +37,9 @@
   }
   const saved = load();
   const state = {
-    liked: new Set(saved.liked || []),
-    playlists: saved.playlists || structuredClone(DEFAULT_PLAYLISTS),
-    recent: saved.recent || [],
+    liked: new Set(),
+    playlists: [],
+    recent: [],
     volume: saved.volume ?? 0.7,
     queue: [],
     index: -1,
@@ -32,7 +53,7 @@
     try {
       localStorage.setItem(
         STORE_KEY,
-        JSON.stringify({ liked: [...state.liked], playlists: state.playlists, recent: state.recent, volume: state.volume })
+        JSON.stringify({ volume: state.volume })
       );
     } catch {
       /* storage unavailable: keep working in memory */
@@ -173,23 +194,31 @@
         .join("")}</div>`;
   }
 
-  function renderSearch() {
+  let searchSeq = 0;
+  async function renderSearch() {
     const input = $("#search-input");
-    const q = input.value.trim().toLowerCase();
+    const q = input.value.trim();
+    const seq = ++searchSeq;
+    input.focus();
     if (!q) {
       view.innerHTML = `<h2 class="row-title">Browse all</h2>
         <div class="genre-grid">${GENRES.map((g) => `<div class="genre" data-genre="${esc(g.name)}" style="background:${g.color}">${esc(g.name)}</div>`).join("")}</div>`;
     } else {
-      const tracks = TRACKS.filter((t) => [t.title, t.artist, albumById(t.album).title].some((s) => s.toLowerCase().includes(q)));
-      const albums = ALBUMS.filter((a) => a.title.toLowerCase().includes(q) || a.artist.toLowerCase().includes(q));
-      const playlists = state.playlists.filter((p) => p.name.toLowerCase().includes(q));
+      let results;
+      try {
+        results = await api("GET", `/search?q=${encodeURIComponent(q)}`);
+      } catch (err) {
+        return failed(err);
+      }
+      // Ignore stale responses: the user kept typing or left the search page
+      if (seq !== searchSeq || state.route.view !== "search") return;
+      const { tracks, albums, playlists } = results;
       view.innerHTML = `
         <h2 class="row-title">Songs</h2>
         ${tracks.length ? trackTable(tracks, { context: "search" }) : `<div class="empty">No songs found for “${esc(q)}”.</div>`}
         ${albums.length ? `<h2 class="row-title">Albums</h2><div class="card-row">${albums.map((a) => card("album", a.id, a.title, a.artist, a.colors)).join("")}</div>` : ""}
         ${playlists.length ? `<h2 class="row-title">Playlists</h2><div class="card-row">${playlists.map((p) => card("playlist", p.id, p.name, p.description, p.colors)).join("")}</div>` : ""}`;
     }
-    input.focus();
   }
   let searchTimer;
   $("#search-input").addEventListener("input", () => {
@@ -321,7 +350,11 @@
     audio.src = t.src;
     audio.play().catch(() => toast("Couldn't start playback — check your connection"));
     state.recent = [t.id, ...state.recent.filter((x) => x !== t.id)].slice(0, 6);
-    persist();
+    api("POST", "/recent", { trackId: t.id })
+      .then((recent) => (state.recent = recent))
+      .catch(() => {
+        /* recently played is best-effort: keep playing even if the server can't be reached */
+      });
     updateNowPlaying();
   }
   function togglePlay() {
@@ -474,41 +507,50 @@
   });
 
   // ---------- Library actions ----------
-  function toggleLike(id) {
-    if (state.liked.has(id)) {
-      state.liked.delete(id);
-      toast("Removed from Liked Songs");
-    } else {
-      state.liked.add(id);
-      toast("Added to Liked Songs");
+  async function toggleLike(id) {
+    const wasLiked = state.liked.has(id);
+    try {
+      state.liked = new Set(await api(wasLiked ? "DELETE" : "PUT", `/liked/${encodeURIComponent(id)}`));
+    } catch (err) {
+      return failed(err);
     }
-    persist();
+    toast(wasLiked ? "Removed from Liked Songs" : "Added to Liked Songs");
     document.querySelectorAll(`[data-like="${id}"]`).forEach((b) => b.classList.toggle("on", state.liked.has(id)));
     if (state.queue[state.index] === id) $("#np-like").classList.toggle("on", state.liked.has(id));
     if (state.route.view === "collection" && state.route.kind === "liked") renderCollection("liked", "liked");
     renderSidebar();
   }
 
-  const PALETTE = [["#e8115b", "#3a0ca3"], ["#1e3264", "#2d9cdb"], ["#148a08", "#0b3d2e"], ["#8d67ab", "#503750"], ["#f59b23", "#c0392b"], ["#27856a", "#1d4ed8"]];
-  function createPlaylist(withTrack) {
+  async function createPlaylist(withTrack) {
     const name = prompt("Playlist name", `My Playlist #${state.playlists.length + 1}`);
     if (!name || !name.trim()) return;
-    const p = { id: `p-${Date.now()}`, name: name.trim(), description: "", tracks: withTrack ? [withTrack] : [], colors: PALETTE[state.playlists.length % PALETTE.length] };
+    let p;
+    try {
+      p = await api("POST", "/playlists", { name: name.trim(), trackId: withTrack });
+    } catch (err) {
+      return failed(err);
+    }
     state.playlists.push(p);
-    persist();
     toast(`Created “${p.name}”`);
     if (!withTrack) navigate({ view: "collection", kind: "playlist", id: p.id });
     else renderSidebar();
   }
   $("#new-playlist").addEventListener("click", () => createPlaylist());
 
-  function addToPlaylist(pid, tid) {
-    const p = playlistById(pid);
-    if (p.tracks.includes(tid)) return toast(`Already in “${p.name}”`);
-    p.tracks.push(tid);
-    persist();
-    renderSidebar();
-    toast(`Added to “${p.name}”`);
+  // Swap in the server's copy of a playlist after a change
+  function replacePlaylist(updated) {
+    state.playlists = state.playlists.map((p) => (p.id === updated.id ? updated : p));
+    return updated;
+  }
+
+  async function addToPlaylist(pid, tid) {
+    try {
+      const p = replacePlaylist(await api("POST", `/playlists/${encodeURIComponent(pid)}/tracks`, { trackId: tid }));
+      renderSidebar();
+      toast(`Added to “${p.name}”`);
+    } catch (err) {
+      failed(err);
+    }
   }
 
   function closeMenu() {
@@ -555,20 +597,27 @@
     if (add) return openAddMenu(add.dataset.add, add);
     const rm = t.closest("[data-remove]");
     if (rm) {
-      const p = playlistById(rm.dataset.from);
-      p.tracks = p.tracks.filter((x) => x !== rm.dataset.remove);
-      persist();
-      toast(`Removed from “${p.name}”`);
-      return render();
+      const { from, remove } = rm.dataset;
+      api("DELETE", `/playlists/${encodeURIComponent(from)}/tracks/${encodeURIComponent(remove)}`)
+        .then((p) => {
+          replacePlaylist(p);
+          toast(`Removed from “${p.name}”`);
+          render();
+        })
+        .catch(failed);
+      return;
     }
     const ren = t.closest("[data-rename]");
     if (ren) {
       const p = playlistById(ren.dataset.rename);
       const name = prompt("Rename playlist", p.name);
       if (name && name.trim()) {
-        p.name = name.trim();
-        persist();
-        render();
+        api("PATCH", `/playlists/${encodeURIComponent(p.id)}`, { name: name.trim() })
+          .then((updated) => {
+            replacePlaylist(updated);
+            render();
+          })
+          .catch(failed);
       }
       return;
     }
@@ -576,10 +625,13 @@
     if (del) {
       const p = playlistById(del.dataset.delete);
       if (confirm(`Delete “${p.name}”?`)) {
-        state.playlists = state.playlists.filter((x) => x !== p);
-        persist();
-        toast("Playlist deleted");
-        navigate({ view: "library" });
+        api("DELETE", `/playlists/${encodeURIComponent(p.id)}`)
+          .then(() => {
+            state.playlists = state.playlists.filter((x) => x.id !== p.id);
+            toast("Playlist deleted");
+            navigate({ view: "library" });
+          })
+          .catch(failed);
       }
       return;
     }
@@ -597,9 +649,14 @@
     }
     const genre = t.closest("[data-genre]");
     if (genre) {
-      const pick = shuffleArr(TRACKS).slice(0, 6).map((x) => x.id);
-      playList(pick, 0);
-      return toast(`Playing a ${genre.dataset.genre} mix`);
+      const name = genre.dataset.genre;
+      api("GET", `/genres/${encodeURIComponent(name)}/mix`)
+        .then((pick) => {
+          playList(pick, 0);
+          toast(`Playing a ${name} mix`);
+        })
+        .catch(failed);
+      return;
     }
     const chip = t.closest("[data-filter]");
     if (chip) navigate({ view: "library", filter: chip.dataset.filter }, { push: false });
@@ -626,6 +683,16 @@
   setVolume(state.volume);
   setRangePct(seek);
   syncButtons();
-  navigate({ view: "home" }, { push: false });
-  probeDurations();
+  Promise.all([api("GET", "/catalog"), api("GET", "/library")])
+    .then(([catalog, library]) => {
+      ({ albums: ALBUMS, tracks: TRACKS, genres: GENRES } = catalog);
+      state.liked = new Set(library.liked);
+      state.playlists = library.playlists;
+      state.recent = library.recent;
+      navigate({ view: "home" }, { push: false });
+      probeDurations();
+    })
+    .catch(() => {
+      view.innerHTML = `<div class="empty">Couldn't reach the NageshSpotify server. Start it with <code>./mvnw spring-boot:run</code> and reload.</div>`;
+    });
 })();
