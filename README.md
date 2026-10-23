@@ -2,6 +2,24 @@
 
 A Spotify-style music player built with **Spring Boot (Java 21)**. The Java backend serves the music catalog and a REST API that stores your likes, playlists and recently played songs in an H2 database. The browser UI is plain HTML, CSS and JavaScript served by the same app.
 
+## Screenshots
+
+**Home**: quick-access tiles, recently played and your playlists
+
+![Home page](docs/screenshots/home.png)
+
+**Album page** with a song playing and liked
+
+![Album page](docs/screenshots/album.png)
+
+**Search** with the queue panel open
+
+![Search results and queue](docs/screenshots/search-queue.png)
+
+**Browse by genre**
+
+![Browse all genres](docs/screenshots/browse.png)
+
 ## Run it
 
 Requires Java 21 or newer. Maven is not needed because the project includes the Maven wrapper.
