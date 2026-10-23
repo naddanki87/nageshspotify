@@ -64,6 +64,7 @@ public class AppTest {
 
     @Test
     public void mainScreenStartsAndShowsTheEmptyState() {
+        new Profile(app).setName("Nagesh");
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
         shadowOf(Looper.getMainLooper()).idle();
         TextView greeting = activity.findViewById(R.id.greeting);

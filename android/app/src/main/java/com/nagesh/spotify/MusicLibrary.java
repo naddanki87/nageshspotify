@@ -111,6 +111,56 @@ public final class MusicLibrary {
         return new Song(-1, uri, title, UNKNOWN_ARTIST, "Opened files", -1, "Opened files", 0);
     }
 
+    public static final String ONLINE = "Online";
+    public static final String YOUR_LINKS = "Your links";
+
+    /** The NageshSpotify demo catalog: freely distributable SoundHelix example songs, streamed over the internet. */
+    private static final String[][] ONLINE_CATALOG = {
+            {"Voltage Bloom", "Neon Harbor", "Midnight Circuits"},
+            {"Afterglow Protocol", "Neon Harbor", "Midnight Circuits"},
+            {"Sunset Freeway", "Saffron Skies", "Golden Hour Drive"},
+            {"Copper Clouds", "Saffron Skies", "Golden Hour Drive"},
+            {"Undertow", "Tidal Echo", "Deep Blue Static"},
+            {"Pressure Waves", "Tidal Echo", "Deep Blue Static"},
+            {"Canopy", "Moss & Pine", "Forest Tapes"},
+            {"Old Cassette Trail", "Moss & Pine", "Forest Tapes"},
+            {"Steam & Static", "Lo-Fi Nagesh", "Chai at 2AM"},
+            {"Window Seat", "Lo-Fi Nagesh", "Chai at 2AM"},
+            {"First Rain", "Rain Theory", "Monsoon Signals"},
+            {"Petrichor Loop", "Rain Theory", "Monsoon Signals"},
+            {"Night Market", "Neon Harbor", "Midnight Circuits"},
+            {"Saffron Road", "Saffron Skies", "Golden Hour Drive"},
+            {"Lighthouse", "Tidal Echo", "Deep Blue Static"},
+            {"Firefly Field", "Moss & Pine", "Forest Tapes"},
+    };
+
+    /** Songs to stream: the user's own links first, then the demo catalog. */
+    public static List<Song> online(Context context) {
+        List<Song> songs = new ArrayList<>();
+        for (String link : new SavedLinks(context).all()) {
+            songs.add(fromLink(Uri.parse(link)));
+        }
+        for (int i = 0; i < ONLINE_CATALOG.length; i++) {
+            String[] t = ONLINE_CATALOG[i];
+            Uri uri = Uri.parse("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-" + (i + 1) + ".mp3");
+            songs.add(new Song(-1, uri, t[0], t[1], t[2], -1, ONLINE, 0));
+        }
+        return songs;
+    }
+
+    /** A song for an http(s) link the user added. */
+    public static Song fromLink(Uri uri) {
+        String segment = uri.getLastPathSegment();
+        String title = stripExtension(clean(segment, clean(uri.getHost(), "Online song")));
+        return new Song(-1, uri, title, clean(uri.getHost(), "Link"), YOUR_LINKS, -1, ONLINE, 0);
+    }
+
+    /** Whether {@code uri} is a web address this app can stream. */
+    public static boolean isWebLink(Uri uri) {
+        String scheme = uri.getScheme();
+        return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) && uri.getHost() != null;
+    }
+
     public static List<Group> byAlbum(List<Song> songs) {
         Map<String, Group> groups = new LinkedHashMap<>();
         for (Song s : songs) {

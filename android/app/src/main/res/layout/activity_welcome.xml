@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_welcome"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_launcher_legacy" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/app_name"
+            android:textColor="@color/text"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Shown once, on first launch -->
+        <LinearLayout
+            android:id="@+id/register_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/register_title"
+                android:textColor="@color/text"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/register_hint"
+                android:textColor="@color/muted"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:labelFor="@+id/name_input"
+                android:text="@string/your_name"
+                android:textColor="@color/text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/name_input"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:autofillHints="personGivenName"
+                android:background="@drawable/bg_input"
+                android:hint="@string/name_hint"
+                android:imeOptions="actionDone"
+                android:inputType="textPersonName|textCapWords"
+                android:maxLength="40"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:singleLine="true"
+                android:textColor="@color/text"
+                android:textColorHint="#FF7A7A7A"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/register_button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_button"
+                android:text="@string/continue_label"
+                android:textAllCaps="false"
+                android:textColor="@color/bg"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Shown after registering, and on every later launch -->
+        <LinearLayout
+            android:id="@+id/welcome_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/welcome_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/text"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/welcome_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:textColor="@color/muted"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/start_button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/bg_button"
+                android:text="@string/start_listening"
+                android:textAllCaps="false"
+                android:textColor="@color/bg"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/change_name"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/muted"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

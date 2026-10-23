@@ -22,14 +22,20 @@ A Spotify-style music player built with **Spring Boot (Java 21)**. The Java back
 
 ## Android app
 
-**[Download NageshSpotify-1.0.apk](downloads/NageshSpotify-1.0.apk)** (62 KB, Android 7.0 or newer)
+**[Download NageshSpotify-1.1.apk](downloads/NageshSpotify-1.1.apk)** (70 KB, Android 7.0 or newer)
 
-A native Android app, written in Java, that plays the music stored on your phone. It works offline and doesn't need the server.
+A native Android app, written in Java, that plays the music stored on your phone and streams songs online. It doesn't need the server.
+
+| First launch | Hello | Every launch after | Online |
+| --- | --- | --- | --- |
+| ![Registration](docs/screenshots/android-register.png) | ![Hello](docs/screenshots/android-hello.png) | ![Welcome back](docs/screenshots/android-welcome-back.png) | ![Online songs](docs/screenshots/android-online.png) |
 
 | Songs | Albums | Folders | Now playing |
 | --- | --- | --- | --- |
 | ![Songs](docs/screenshots/android-songs.png) | ![Albums](docs/screenshots/android-albums.png) | ![Folders](docs/screenshots/android-folders.png) | ![Now playing](docs/screenshots/android-now-playing.png) |
 
+- **One-time registration**: the first time you open the app it asks for your name and greets you with "Hello, *name*!". The name is saved on the phone, so every later launch skips the form and says "Welcome back, *name*!". Tap **Change name** on the welcome screen to change it.
+- **Online** tab: stream the NageshSpotify demo songs, or tap the link button to add any song URL (MP3, AAC, M4A, OGG…). Your links are saved; long-press one to remove it.
 - Finds every audio file on the device (MP3, M4A, FLAC, OGG, WAV and any other format Android can play) and lists it by **song, album, artist or folder**, with search
 - **Liked songs**, saved on the phone
 - Full **Now Playing** screen: seek, shuffle, repeat (off → all → one), previous/next
@@ -39,9 +45,9 @@ A native Android app, written in Java, that plays the music stored on your phone
 
 ### Install
 
-1. Download `NageshSpotify-1.0.apk` on your phone (on GitHub, open the file and tap **Download raw file**).
+1. Download `NageshSpotify-1.1.apk` on your phone (on GitHub, open the file and tap **Download raw file**).
 2. Open it. If Android asks, allow your browser or file manager to **install unknown apps**, then tap **Install**.
-3. Open NageshSpotify and tap **Allow** so it can read the music on your device.
+3. Open NageshSpotify, enter your name (asked only once) and tap **Allow** so it can read the music on your device.
 
 If Play Protect warns that it doesn't recognize the developer, tap **More details → Install anyway**. The app is signed with a personal key, not one registered with Google Play.
 

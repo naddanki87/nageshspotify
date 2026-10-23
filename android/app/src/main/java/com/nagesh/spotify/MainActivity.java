@@ -8,8 +8,10 @@ import java.util.Locale;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -20,6 +22,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -40,13 +44,19 @@ public class MainActivity extends Activity implements PlayerService.Listener {
     private static final int REQUEST_PERMISSIONS = 1;
     private static final int REQUEST_OPEN_FILES = 2;
 
-    private enum Tab { SONGS, ALBUMS, ARTISTS, FOLDERS, LIKED }
+    private enum Tab { SONGS, ONLINE, ALBUMS, ARTISTS, FOLDERS, LIKED }
+
+    private static final int[] TAB_IDS = {
+            R.id.tab_songs, R.id.tab_online, R.id.tab_albums, R.id.tab_artists, R.id.tab_folders, R.id.tab_liked,
+    };
 
     private final Handler main = new Handler(Looper.getMainLooper());
     private PlayerService player;
     private Likes likes;
 
     private List<Song> allSongs = new ArrayList<>();
+    private List<Song> onlineSongs = new ArrayList<>();
+    private SavedLinks links;
     private boolean loaded;
     private Tab tab = Tab.SONGS;
     /** The album, artist or folder being shown, or null for the tab's top level. */
@@ -107,9 +117,12 @@ public class MainActivity extends Activity implements PlayerService.Listener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         likes = new Likes(this);
+        links = new SavedLinks(this);
+        onlineSongs = MusicLibrary.online(this);
         rowCoverPx = Math.round(48 * getResources().getDisplayMetrics().density);
 
-        ((TextView) findViewById(R.id.greeting)).setText(greeting() + ", Nagesh");
+        String name = new Profile(this).name();
+        ((TextView) findViewById(R.id.greeting)).setText(greeting() + ", " + (name != null ? name : "there"));
         list = findViewById(R.id.list);
         empty = findViewById(R.id.empty);
         emptyText = findViewById(R.id.empty_text);
@@ -140,7 +153,19 @@ public class MainActivity extends Activity implements PlayerService.Listener {
             }
         });
 
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (showingGroups || !links.contains(shownSongs.get(position).key())) {
+                    return false;
+                }
+                confirmRemoveLink(shownSongs.get(position));
+                return true;
+            }
+        });
+
         bindTab(R.id.tab_songs, Tab.SONGS);
+        bindTab(R.id.tab_online, Tab.ONLINE);
         bindTab(R.id.tab_albums, Tab.ALBUMS);
         bindTab(R.id.tab_artists, Tab.ARTISTS);
         bindTab(R.id.tab_folders, Tab.FOLDERS);
@@ -200,6 +225,12 @@ public class MainActivity extends Activity implements PlayerService.Listener {
                         .setType("audio/*")
                         .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 startActivityForResult(intent, REQUEST_OPEN_FILES);
+            }
+        });
+        findViewById(R.id.add_link).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAddLinkDialog();
             }
         });
         findViewById(R.id.refresh).setOnClickListener(new View.OnClickListener() {
@@ -373,6 +404,71 @@ public class MainActivity extends Activity implements PlayerService.Listener {
         }
     }
 
+    // ---------- Online links ----------
+
+    private void showAddLinkDialog() {
+        final EditText input = new EditText(this);
+        input.setHint(R.string.add_link_hint);
+        input.setSingleLine(true);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        int pad = Math.round(20 * getResources().getDisplayMetrics().density);
+        FrameLayout box = new FrameLayout(this);
+        box.setPadding(pad, pad / 2, pad, 0);
+        box.addView(input);
+
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.add_link)
+                .setMessage(R.string.add_link_message)
+                .setView(box)
+                .setPositiveButton(R.string.add, null)
+                .setNegativeButton(R.string.cancel, null)
+                .create();
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface d) {
+                // Validate before closing, so a typo doesn't lose what was typed
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Uri uri = Uri.parse(input.getText().toString().trim());
+                        if (!MusicLibrary.isWebLink(uri)) {
+                            input.setError(getString(R.string.invalid_link));
+                            return;
+                        }
+                        dialog.dismiss();
+                        addLink(uri);
+                    }
+                });
+            }
+        });
+        dialog.show();
+    }
+
+    private void addLink(Uri uri) {
+        links.add(uri.toString());
+        onlineSongs = MusicLibrary.online(this);
+        selectTab(Tab.ONLINE);
+        if (player != null) {
+            player.playAll(Collections.singletonList(MusicLibrary.fromLink(uri)), 0, false);
+        }
+    }
+
+    private void confirmRemoveLink(final Song song) {
+        new AlertDialog.Builder(this)
+                .setTitle(song.title)
+                .setMessage(R.string.remove_link)
+                .setPositiveButton(R.string.remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        links.remove(song.key());
+                        onlineSongs = MusicLibrary.online(MainActivity.this);
+                        refreshList();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
     // ---------- Tabs and groups ----------
 
     private void bindTab(int id, final Tab t) {
@@ -387,14 +483,9 @@ public class MainActivity extends Activity implements PlayerService.Listener {
     private void selectTab(Tab t) {
         tab = t;
         openGroup = null;
-        findViewById(R.id.tab_songs).setSelected(t == Tab.SONGS);
-        findViewById(R.id.tab_albums).setSelected(t == Tab.ALBUMS);
-        findViewById(R.id.tab_artists).setSelected(t == Tab.ARTISTS);
-        findViewById(R.id.tab_folders).setSelected(t == Tab.FOLDERS);
-        findViewById(R.id.tab_liked).setSelected(t == Tab.LIKED);
-        int[] ids = {R.id.tab_songs, R.id.tab_albums, R.id.tab_artists, R.id.tab_folders, R.id.tab_liked};
-        for (int id : ids) {
-            TextView chip = findViewById(id);
+        for (int i = 0; i < TAB_IDS.length; i++) {
+            TextView chip = findViewById(TAB_IDS[i]);
+            chip.setSelected(Tab.values()[i] == t);
             chip.setTextColor(chip.isSelected() ? 0xFF000000 : 0xFFFFFFFF);
         }
         refreshList();
@@ -415,17 +506,31 @@ public class MainActivity extends Activity implements PlayerService.Listener {
     }
 
     private void refreshList() {
-        if (!loaded) {
-            return;
-        }
         shownSongs.clear();
         shownGroups.clear();
+        if (!loaded && tab != Tab.ONLINE) {
+            // The device's music isn't available yet (still loading, or no permission)
+            showingGroups = false;
+            groupHeader.setVisibility(View.GONE);
+            adapter.notifyDataSetChanged();
+            if (!hasAudioPermission()) {
+                showEmpty(getString(R.string.permission_needed), true);
+            }
+            return;
+        }
         List<Song> base;
         if (openGroup != null) {
             base = openGroup.songs;
+        } else if (tab == Tab.ONLINE) {
+            base = onlineSongs;
         } else if (tab == Tab.LIKED) {
             base = new ArrayList<>();
             for (Song s : allSongs) {
+                if (likes.isLiked(s)) {
+                    base.add(s);
+                }
+            }
+            for (Song s : onlineSongs) {
                 if (likes.isLiked(s)) {
                     base.add(s);
                 }
@@ -560,7 +665,7 @@ public class MainActivity extends Activity implements PlayerService.Listener {
             title.setTextColor(playing ? getColor(R.color.accent) : getColor(R.color.text));
             subtitle.setText(s.artist + " • " + s.album);
             duration.setVisibility(View.VISIBLE);
-            duration.setText(Song.formatTime(s.durationMs));
+            duration.setText(s.durationMs > 0 ? Song.formatTime(s.durationMs) : ""); // unknown for streams
             like.setVisibility(View.VISIBLE);
             boolean liked = likes.isLiked(s);
             like.setImageResource(liked ? R.drawable.ic_heart : R.drawable.ic_heart_outline);

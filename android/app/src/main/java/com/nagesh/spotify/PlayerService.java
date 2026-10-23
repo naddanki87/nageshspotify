@@ -438,7 +438,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     private void failed(Song song) {
-        Toast.makeText(this, "Can't play “" + song.title + "”", Toast.LENGTH_SHORT).show();
+        String message = "Can't play “" + song.title + "”";
+        if (MusicLibrary.isWebLink(song.uri)) {
+            message += ". Check your internet connection.";
+        }
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         releasePlayer();
         publish();
     }

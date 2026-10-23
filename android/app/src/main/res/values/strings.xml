@@ -3,6 +3,7 @@
     <string name="app_name">NageshSpotify</string>
     <string name="search_hint">Search songs, artists, albums</string>
     <string name="tab_songs">Songs</string>
+    <string name="tab_online">Online</string>
     <string name="tab_albums">Albums</string>
     <string name="tab_artists">Artists</string>
     <string name="tab_folders">Folders</string>
@@ -26,4 +27,24 @@
     <string name="no_results">Nothing matches your search.</string>
     <string name="no_liked">Songs you like will appear here. Tap the heart on any song.</string>
     <string name="channel_name">Playback</string>
+    <string name="register_title">Welcome! What should we call you?</string>
+    <string name="register_hint">We\'ll only ask once. Your name is saved on this phone and never leaves it.</string>
+    <string name="your_name">Your name</string>
+    <string name="name_hint">e.g. Nagesh</string>
+    <string name="name_required">Please enter your name</string>
+    <string name="continue_label">Continue</string>
+    <string name="hello_name">Hello, %1$s!</string>
+    <string name="hello_subtitle">You\'re all set. Your music is ready to play.</string>
+    <string name="welcome_back_name">Welcome back, %1$s!</string>
+    <string name="welcome_back_subtitle">Pick up where you left off.</string>
+    <string name="start_listening">Start listening</string>
+    <string name="not_you">Not %1$s? Change name</string>
+    <string name="add_link">Add online song</string>
+    <string name="add_link_message">Paste a link to an audio file or stream (MP3, AAC, M4A, OGG…)</string>
+    <string name="add_link_hint">https://example.com/song.mp3</string>
+    <string name="add">Add and play</string>
+    <string name="cancel">Cancel</string>
+    <string name="invalid_link">That doesn\'t look like a web link (http:// or https://)</string>
+    <string name="remove_link">Remove this link from Online?</string>
+    <string name="remove">Remove</string>
 </resources>
